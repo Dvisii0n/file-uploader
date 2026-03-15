@@ -1,8 +1,11 @@
 import { Router } from "express";
-import { getHome } from "../controllers/homeController.js";
+import homeController from "../controllers/homeController.js";
+import { uploadFiles } from "../middleware/multer.js";
 
 const homeRouter = new Router();
 
-homeRouter.get("/", getHome);
+homeRouter.get("/", homeController.getHome);
+
+homeRouter.post("/upload", uploadFiles, homeController.uploadFiles);
 
 export default homeRouter;
