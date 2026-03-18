@@ -1,0 +1,7 @@
+.folderRow {
+	border: 1px solid;
+	padding: 12px;
+	display: flex;
+	align-items: center;
+	gap: 15px;
+}
