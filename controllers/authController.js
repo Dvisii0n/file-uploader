@@ -16,6 +16,9 @@ const signupUser = async (req, res, next) => {
 				email: email,
 				username: username,
 				password: passwordHash,
+				folders: {
+					create: [{ name: "home" }],
+				},
 			},
 		});
 		res.redirect("/login");
