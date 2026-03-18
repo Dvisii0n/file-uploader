@@ -3,21 +3,12 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" href="/styles.css">
 		<title>Home</title>
 	</head>
 	<body>
-		<h1><%= currentUser.username %></h1>
+		<h1>Welcome back <%= currentUser.username %></h1>
 		<a href="/logout">Log out</a>
-		<button commandfor="upload-form" command="show-modal">Upload file</button>
-		<dialog id="upload-form">
-			<form action="/home/upload" method="post" enctype="multipart/form-data">
-				<button type="button" commandfor="upload-form" command="close">
-					Close
-				</button>
-				<label for="uploadedFiles">Files</label>
-				<input type="file" name="uploadedFiles" multiple required />
-				<button type="submit" name="filename">Upload</button>
-			</form>
-		</dialog>
+		<%- include('folder', {folderData: folderData}) %>
 	</body>
 </html>
