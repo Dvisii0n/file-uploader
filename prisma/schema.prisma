@@ -30,10 +30,11 @@ model Folder {
 
 model File {
   id Int @id @default(autoincrement())
-  name String @unique
+  name String 
   fileUrl String @unique
   parentFolder Folder @relation(fields: [parentFolderId], references: [id], onDelete: Cascade)
   parentFolderId Int
+  size_bytes Int
   createdAt DateTime @default(now())
 }
 
