@@ -1,5 +1,7 @@
 import { Router } from "express";
 import homeController from "../controllers/homeController.js";
+import folderController from "../controllers/folderController.js";
+import fileController from "../controllers/fileController.js";
 import { multerUpload } from "../middleware/multer.js";
 import { checkAuth } from "../middleware/authHandler.js";
 
@@ -8,14 +10,16 @@ const homeRouter = new Router();
 homeRouter.use(checkAuth);
 
 homeRouter.get("/", homeController.getHome);
-homeRouter.get("/folder/:id", homeController.getFolder);
 
-homeRouter.post("/upload/:parentId", multerUpload, homeController.fileUpload);
+homeRouter.post("/upload/:parentId", multerUpload, fileController.fileUpload);
+homeRouter.get("/downloadFile/", fileController.downloadFile);
 
-homeRouter.post("/createFolder/:parentId", homeController.createFolder);
+homeRouter.get("/folder/:id", folderController.getFolder);
 
-homeRouter.post("/editFolder/:id", homeController.editFolder);
+homeRouter.post("/createFolder/:parentId", folderController.createFolder);
 
-homeRouter.post("/deleteFolder/:id", homeController.deleteFolder);
+homeRouter.post("/editFolder/:id", folderController.editFolder);
+
+homeRouter.post("/deleteFolder/:id", folderController.deleteFolder);
 
 export default homeRouter;
