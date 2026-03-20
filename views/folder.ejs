@@ -9,7 +9,7 @@
 				Close
 			</button>
 			<label for="uploadedFiles">Files</label>
-			<input type="file" name="uploadedFiles" multiple required />
+			<input id="file-upload" type="file" name="uploadedFiles" multiple required />
 			<button type="submit">Upload</button>
 		</form>
 	</dialog>
@@ -26,7 +26,11 @@
 	</dialog>
 	<a href="/home">Home</a>
 
-	
+	<% if (!folderData.folders.length && !folderData.files.length) {%>
+		<p>This folder is empty</p>	
+	<%} %>
+
+
 	<% if (folderData.folders.length) {%>
 		<% folderData.folders.forEach(folder => {%>
 			<div class="folderRow">
@@ -45,13 +49,19 @@
 				<form action="/home/deleteFolder/<%= folder.id %>" method="post">
 					<button type="submit">Delete</button>
 				</form>
-				
-				
-				
 			</div>
 		<%}) %>
-	<% } else {%>
-		<p>this folder is empty</p>
 	<% } %>
+
+	<% if (folderData.files.length) {%>
+			<% folderData.files.forEach(file => {%>
+				<div class="fileRow">
+					<p><%= file.name %></p>
+					<p><%= file.createdAt %></p>
+					<p><%= file.size %></p>
+					<a href="/home/downloadFile/?fileId=<%= file.id%>">Download File</a>
+				</div>		
+			<%}) %>
+		<% } %>
 
 </div>
