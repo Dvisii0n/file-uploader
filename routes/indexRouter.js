@@ -3,7 +3,11 @@ import {
 	loginUser,
 	signupUser,
 	logoutUser,
+	getLogin,
+	getSignUp,
 } from "../controllers/authController.js";
+import { validateSignUp } from "../validation/authValidation.js";
+import { query } from "express-validator";
 
 const indexRouter = new Router();
 
@@ -15,25 +19,14 @@ indexRouter.get("/", (req, res, next) => {
 	}
 });
 
-indexRouter.get("/login", (req, res, next) => {
-	try {
-		res.render("login");
-	} catch (error) {
-		next(err);
-	}
-});
+indexRouter.get("/login", query("error").escape(), getLogin);
 
-indexRouter.get("/signup", (req, res, next) => {
-	try {
-		res.render("signup");
-	} catch (error) {
-		next(err);
-	}
-});
+indexRouter.get("/signup", getSignUp);
 
 indexRouter.get("/logout", logoutUser);
 
 indexRouter.post("/login", loginUser);
-indexRouter.post("/signup", signupUser);
+
+indexRouter.post("/signup", validateSignUp, signupUser);
 
 export default indexRouter;
