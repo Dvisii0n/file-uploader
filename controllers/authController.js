@@ -1,15 +1,46 @@
 import passport from "passport";
 import { prisma } from "../lib/prisma.js";
+import { matchedData, validationResult } from "express-validator";
 import bcrypt from "bcryptjs";
+import { getBodyErrors } from "../utils/utils.js";
+
+const getLogin = (req, res, next) => {
+	try {
+		const { error } = matchedData(req);
+		if (error === "true") {
+			res.render("login", { loginError: req.session.messages[0] });
+			return;
+		}
+		res.render("login", { loginError: "" });
+	} catch (err) {
+		next(err);
+	}
+};
+
+const getSignUp = (req, res, next) => {
+	try {
+		res.render("signup", { bodyErrors: {} });
+	} catch (error) {
+		next(err);
+	}
+};
 
 const loginUser = passport.authenticate("local", {
 	successRedirect: "/home",
-	failureRedirect: "/login",
+	failureRedirect: "/login?error=true",
+	failureMessage: "Invalid user or password",
 });
 
 const signupUser = async (req, res, next) => {
 	try {
-		const { email, username, password } = req.body;
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			const bodyErrors = getBodyErrors(errors.array());
+			res.render("signup", { bodyErrors: bodyErrors });
+			return;
+		}
+
+		const { email, username, password } = matchedData(req);
 		const passwordHash = await bcrypt.hash(password, 10);
 		await prisma.user.create({
 			data: {
@@ -34,4 +65,4 @@ const logoutUser = async (req, res, next) => {
 	});
 };
 
-export { loginUser, signupUser, logoutUser };
+export { loginUser, signupUser, logoutUser, getLogin, getSignUp };
