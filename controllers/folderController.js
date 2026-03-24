@@ -1,3 +1,4 @@
+import { matchedData, validationResult } from "express-validator";
 import { prisma } from "../lib/prisma.js";
 import { supabaseDelete } from "../middleware/supabase.js";
 
@@ -16,7 +17,14 @@ async function verifyOwnership(userId, folderId) {
 
 async function getFolder(req, res, next) {
 	try {
-		const folderId = parseInt(req.params.id);
+		const errors = validationResult(req);
+
+		if (!errors.isEmpty()) {
+			res.redirect(req.get("referer"));
+			return;
+		}
+
+		const { id: folderId } = matchedData(req);
 
 		const isOwner = await verifyOwnership(req.user.id, folderId);
 
@@ -38,11 +46,18 @@ async function getFolder(req, res, next) {
 
 async function createFolder(req, res, next) {
 	try {
-		const { folderName } = req.body;
-		const ownerId = req.user.id;
-		const parentFolderId = parseInt(req.params.parentId);
+		const errors = validationResult(req);
 
-		const isOwner = await verifyOwnership(req.user.id, parentFolderId);
+		if (!errors.isEmpty()) {
+			console.log(errors.array());
+			res.redirect(req.get("referer"));
+			return;
+		}
+
+		const { parentId, folderName } = matchedData(req);
+		const ownerId = req.user.id;
+
+		const isOwner = await verifyOwnership(req.user.id, parentId);
 
 		if (!isOwner) {
 			res.redirect("/home");
@@ -53,7 +68,7 @@ async function createFolder(req, res, next) {
 			data: {
 				name: folderName,
 				ownerId: ownerId,
-				parentFolderId: parentFolderId,
+				parentFolderId: parentId,
 			},
 		});
 
@@ -65,9 +80,16 @@ async function createFolder(req, res, next) {
 
 async function deleteFolder(req, res, next) {
 	try {
-		const folderId = parseInt(req.params.id);
+		const errors = validationResult(req);
 
-		const isOwner = await verifyOwnership(req.user.id, folderId);
+		if (!errors.isEmpty()) {
+			res.redirect("/home");
+			return;
+		}
+		const { id: folderId } = matchedData(req);
+		const parsedFolderId = parseInt(folderId);
+
+		const isOwner = await verifyOwnership(req.user.id, parsedFolderId);
 
 		if (!isOwner) {
 			res.redirect("/home");
@@ -76,7 +98,7 @@ async function deleteFolder(req, res, next) {
 
 		//remove folder and files from database
 		const { files } = await prisma.folder.delete({
-			where: { id: folderId },
+			where: { id: parsedFolderId },
 			select: {
 				files: {
 					select: { fileUrl: true },
@@ -98,9 +120,18 @@ async function deleteFolder(req, res, next) {
 
 async function editFolder(req, res, next) {
 	try {
-		const folderId = parseInt(req.params.id);
+		const { id: folderId } = matchedData(req);
 
-		const isOwner = await verifyOwnership(req.user.id, folderId);
+		const parsedFolderId = parseInt(folderId);
+
+		const errors = validationResult(req);
+
+		if (!errors.isEmpty()) {
+			res.redirect(req.get("referer"));
+			return;
+		}
+
+		const isOwner = await verifyOwnership(req.user.id, parsedFolderId);
 
 		if (!isOwner) {
 			res.redirect("/home");
@@ -109,7 +140,7 @@ async function editFolder(req, res, next) {
 
 		const { newFolderName } = req.body;
 		await prisma.folder.update({
-			where: { id: folderId },
+			where: { id: parsedFolderId },
 			data: {
 				name: newFolderName,
 			},

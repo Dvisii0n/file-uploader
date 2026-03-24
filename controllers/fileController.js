@@ -1,3 +1,4 @@
+import { matchedData, validationResult } from "express-validator";
 import { prisma } from "../lib/prisma.js";
 import {
 	getSupabaseDownloadUrl,
@@ -8,7 +9,13 @@ import path from "path";
 
 async function fileUpload(req, res, next) {
 	try {
-		const parentId = parseInt(req.params.parentId);
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			res.send(errors);
+			return;
+		}
+
+		const { parentId } = matchedData(req);
 		const { ownerId } = await prisma.folder.findUnique({
 			where: { id: parentId },
 			select: { ownerId: true },
@@ -54,7 +61,12 @@ async function fileUpload(req, res, next) {
 
 async function downloadFile(req, res, next) {
 	try {
-		const fileId = parseInt(req.query.fileId);
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			res.send(errors);
+			return;
+		}
+		const { fileId } = matchedData(req);
 		const data = await prisma.file.findUnique({
 			where: { id: fileId },
 			select: {
@@ -79,7 +91,12 @@ async function downloadFile(req, res, next) {
 
 async function deleteFile(req, res, next) {
 	try {
-		const fileId = parseInt(req.query.fileId);
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			res.send(errors);
+			return;
+		}
+		const { fileId } = matchedData(req);
 		const data = await prisma.file.findUnique({
 			where: { id: fileId },
 			select: {
@@ -105,7 +122,13 @@ async function deleteFile(req, res, next) {
 
 async function editFile(req, res, next) {
 	try {
-		const fileId = parseInt(req.query.fileId);
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			res.send(errors);
+			return;
+		}
+
+		const { fileId } = matchedData(req);
 		const newName = req.body.newFileName;
 		const data = await prisma.file.findUnique({
 			where: { id: fileId },
