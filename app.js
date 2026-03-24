@@ -34,7 +34,7 @@ app.use(
 		},
 		secret: process.env.SESSION_SECRET,
 		resave: true,
-		saveUninitialized: true,
+		saveUninitialized: false,
 		store: new PrismaSessionStore(prisma, {
 			checkPeriod: 2 * 60 * 1000, //ms
 			dbRecordIdIsSessionId: true,

@@ -37,7 +37,6 @@ const validateSignUp = [
 
 	body("password")
 		.trim()
-		.escape()
 		.isStrongPassword()
 		.withMessage("Password must only contain letters and numbers or symbols"),
 
