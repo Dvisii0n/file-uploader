@@ -122,8 +122,6 @@ async function editFolder(req, res, next) {
 	try {
 		const { id: folderId } = matchedData(req);
 
-		const parsedFolderId = parseInt(folderId);
-
 		const errors = validationResult(req);
 
 		if (!errors.isEmpty()) {
@@ -131,7 +129,7 @@ async function editFolder(req, res, next) {
 			return;
 		}
 
-		const isOwner = await verifyOwnership(req.user.id, parsedFolderId);
+		const isOwner = await verifyOwnership(req.user.id, folderId);
 
 		if (!isOwner) {
 			res.redirect("/home");
@@ -140,7 +138,7 @@ async function editFolder(req, res, next) {
 
 		const { newFolderName } = req.body;
 		await prisma.folder.update({
-			where: { id: parsedFolderId },
+			where: { id: folderId },
 			data: {
 				name: newFolderName,
 			},
