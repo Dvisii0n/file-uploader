@@ -2,6 +2,7 @@ import { matchedData, validationResult } from "express-validator";
 import { prisma } from "../lib/prisma.js";
 import { supabaseDelete } from "../middleware/supabase.js";
 import BASE_URL from "../utils/baseUrl.js";
+import { getFullSharedFoldersData } from "../utils/utils.js";
 
 async function verifyOwnership(userId, folderId) {
 	const { ownerId } = await prisma.folder.findUnique({
@@ -88,9 +89,8 @@ async function deleteFolder(req, res, next) {
 			return;
 		}
 		const { id: folderId } = matchedData(req);
-		const parsedFolderId = parseInt(folderId);
 
-		const isOwner = await verifyOwnership(req.user.id, parsedFolderId);
+		const isOwner = await verifyOwnership(req.user.id, folderId);
 
 		if (!isOwner) {
 			next();
@@ -100,7 +100,7 @@ async function deleteFolder(req, res, next) {
 		//remove parents, get orphans and delete them
 		const [deletedFolders, orphanFiles] = await prisma.$transaction([
 			prisma.folder.delete({
-				where: { id: parsedFolderId },
+				where: { id: folderId },
 				select: {
 					files: {
 						select: { fileUrl: true },
@@ -161,24 +161,31 @@ async function editFolder(req, res, next) {
 async function createSharedFolder(req, res, next) {
 	try {
 		const errors = validationResult(req);
-
 		if (!errors.isEmpty()) {
 			res.redirect(req.get("referer"));
 			return;
 		}
 
 		const { id: folderId, duration } = matchedData(req);
-		const shareId = crypto.randomUUID();
-		const expiresAt = new Date();
 
-		expiresAt.setDate(expiresAt.getDate() + duration);
+		const isOwner = await verifyOwnership(req.user.id, folderId);
+		if (!isOwner) {
+			next();
+		}
 
-		await prisma.sharedFolder.create({
-			data: {
-				id: shareId,
-				sharedFolderId: folderId,
-				expiresAt: expiresAt,
-			},
+		const folders = await prisma.folder.findMany({
+			where: { ownerId: req.user.id },
+			orderBy: { id: "desc" },
+		});
+
+		const [shareId, data] = getFullSharedFoldersData(
+			folders,
+			folderId,
+			duration,
+		);
+
+		await prisma.sharedFolder.createMany({
+			data: data,
 		});
 
 		res.redirect("/home/getFolderShareLink?shareId=" + shareId);
@@ -215,13 +222,19 @@ async function getSharedFolder(req, res, next) {
 			include: {
 				sharedFolder: {
 					include: {
-						folders: true,
+						folders: {
+							include: {
+								sharedFolders: {
+									select: { id: true },
+									where: { parentShareId: folderUUID },
+								},
+							},
+						},
 						files: true,
 					},
 				},
 			},
 		});
-		console.log(folderData);
 		res.render("readOnlyOpenFolder", { folderData: folderData });
 	} catch (err) {
 		next(err);
