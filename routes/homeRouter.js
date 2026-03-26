@@ -6,9 +6,11 @@ import { multerUpload } from "../middleware/multer.js";
 import { checkAuth } from "../middleware/authHandler.js";
 import {
 	validateCreateFolder,
+	validateCreateSharedFolder,
 	validateDeleteFolder,
 	validateEditFolder,
 	validateGetFolder,
+	validateShareId,
 } from "../validation/folderValidation.js";
 import {
 	validateDeleteFile,
@@ -62,6 +64,18 @@ homeRouter.post(
 	"/deleteFolder/:id",
 	validateDeleteFolder,
 	folderController.deleteFolder,
+);
+
+homeRouter.post(
+	"/createSharedFolder/:id",
+	validateCreateSharedFolder,
+	folderController.createSharedFolder,
+);
+
+homeRouter.get(
+	"/getFolderShareLink",
+	validateShareId,
+	folderController.getFolderShareLink,
 );
 
 export default homeRouter;

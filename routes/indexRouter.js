@@ -9,6 +9,7 @@ import {
 import folderController from "../controllers/folderController.js";
 import { validateSignUp } from "../validation/authValidation.js";
 import { query } from "express-validator";
+import { validateGetSharedFolder } from "../validation/folderValidation.js";
 
 const indexRouter = new Router();
 
@@ -20,7 +21,11 @@ indexRouter.get("/", (req, res, next) => {
 	}
 });
 
-indexRouter.get("/share/:folderUUID", folderController.getSharedFolder);
+indexRouter.get(
+	"/share/:folderUUID",
+	validateGetSharedFolder,
+	folderController.getSharedFolder,
+);
 
 indexRouter.get("/login", query("error").escape(), getLogin);
 
