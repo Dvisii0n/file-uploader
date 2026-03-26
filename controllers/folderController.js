@@ -1,6 +1,7 @@
 import { matchedData, validationResult } from "express-validator";
 import { prisma } from "../lib/prisma.js";
 import { supabaseDelete } from "../middleware/supabase.js";
+import BASE_URL from "../utils/baseUrl.js";
 
 async function verifyOwnership(userId, folderId) {
 	const { ownerId } = await prisma.folder.findUnique({
@@ -157,9 +158,71 @@ async function editFolder(req, res, next) {
 	}
 }
 
+async function createSharedFolder(req, res, next) {
+	try {
+		const errors = validationResult(req);
+
+		if (!errors.isEmpty()) {
+			res.redirect(req.get("referer"));
+			return;
+		}
+
+		const { id: folderId, duration } = matchedData(req);
+		const shareId = crypto.randomUUID();
+		const expiresAt = new Date();
+
+		expiresAt.setDate(expiresAt.getDate() + duration);
+
+		await prisma.sharedFolder.create({
+			data: {
+				id: shareId,
+				sharedFolderId: folderId,
+				expiresAt: expiresAt,
+			},
+		});
+
+		res.redirect("/home/getFolderShareLink?shareId=" + shareId);
+	} catch (err) {
+		next(err);
+	}
+}
+
+async function getFolderShareLink(req, res, next) {
+	try {
+		const errors = validationResult(req);
+
+		if (!errors.isEmpty()) {
+			next();
+		}
+
+		const { shareId } = matchedData(req);
+		const shareLink = `${BASE_URL}/share/${shareId}`;
+		res.render("shareLink", { shareLink: shareLink });
+	} catch (err) {
+		next(err);
+	}
+}
+
 async function getSharedFolder(req, res, next) {
 	try {
-		res.render("index");
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			next();
+		}
+		const { folderUUID } = matchedData(req);
+		const { sharedFolder: folderData } = await prisma.sharedFolder.findUnique({
+			where: { id: folderUUID },
+			include: {
+				sharedFolder: {
+					include: {
+						folders: true,
+						files: true,
+					},
+				},
+			},
+		});
+		console.log(folderData);
+		res.render("readOnlyOpenFolder", { folderData: folderData });
 	} catch (err) {
 		next(err);
 	}
@@ -171,4 +234,6 @@ export default {
 	createFolder,
 	deleteFolder,
 	getSharedFolder,
+	createSharedFolder,
+	getFolderShareLink,
 };
