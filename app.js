@@ -5,8 +5,7 @@ import passport from "passport";
 import passportConfig from "./config/passport.js";
 import "dotenv/config";
 import expressSession from "express-session";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "./generated/prisma/client.js";
+import { prisma } from "./lib/prisma.js";
 import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 
 import indexRouter from "./routes/indexRouter.js";
@@ -19,10 +18,6 @@ const assetsPath = path.join(__dirname, "public");
 const app = express();
 const PORT = 3000;
 
-const connectionString = `${process.env.DATABASE_URL}`;
-const adapter = new PrismaPg({ connectionString });
-const prisma = new PrismaClient({ adapter });
-
 app.use(express.static(assetsPath));
 app.use(express.urlencoded({ extended: true }));
 
@@ -31,9 +26,12 @@ app.use(
 	expressSession({
 		cookie: {
 			maxAge: 24 * 60 * 60 * 1000, //ms, one day
+			httpOnly: true,
+			secure: process.env.NODE_ENV === "production",
+			sameSite: "strict",
 		},
 		secret: process.env.SESSION_SECRET,
-		resave: true,
+		resave: false,
 		saveUninitialized: false,
 		store: new PrismaSessionStore(prisma, {
 			checkPeriod: 2 * 60 * 1000, //ms
