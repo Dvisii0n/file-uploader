@@ -20,7 +20,7 @@ const getLogin = (req, res, next) => {
 const getSignUp = (req, res, next) => {
 	try {
 		res.render("signup", { bodyErrors: {} });
-	} catch (error) {
+	} catch (err) {
 		next(err);
 	}
 };
