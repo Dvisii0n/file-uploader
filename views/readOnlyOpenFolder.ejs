@@ -21,7 +21,7 @@
 		<% } %>
 
 		<% if (folderData.files.length) {%>
-		<%- include('partials/readOnlyFileRows', {files: folderData.files}) %>
+		<%- include('partials/readOnlyFileRows', {files: folderData.files, parentShareId: shareId}) %>
 
 		<% } %>
 	</div>
