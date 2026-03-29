@@ -125,7 +125,7 @@ async function deleteFile(req, res, next) {
 		}
 
 		await prisma.file.delete({ where: { id: fileId } });
-		await supabaseDelete(res, [data.fileUrl]);
+		await supabaseDelete([data.fileUrl]);
 		res.redirect(req.get("referer"));
 	} catch (err) {
 		next(err);

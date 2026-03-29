@@ -66,7 +66,7 @@ async function createFolder(req, res, next) {
 		}
 
 		const result = await prisma.$transaction(async (tx) => {
-			const createdFolder = await prisma.folder.create({
+			const createdFolder = await tx.folder.create({
 				data: {
 					id: crypto.randomUUID(),
 					name: folderName,
@@ -75,7 +75,7 @@ async function createFolder(req, res, next) {
 				},
 			});
 
-			const parentShares = await prisma.sharedFolder.findMany({
+			const parentShares = await tx.sharedFolder.findMany({
 				where: { sharedFolderId: createdFolder.parentFolderId },
 			});
 
@@ -93,7 +93,7 @@ async function createFolder(req, res, next) {
 				}
 
 				//for each share related to the parent, create a new child share
-				await prisma.sharedFolder.createMany({ data: sharesToCreate });
+				await tx.sharedFolder.createMany({ data: sharesToCreate });
 			}
 		});
 
@@ -121,24 +121,28 @@ async function deleteFolder(req, res, next) {
 		}
 
 		//remove parents, get orphans and delete them
-		await prisma.$transaction(async (tx) => {
-			await prisma.folder.delete({
+		const orphans = await prisma.$transaction(async (tx) => {
+			await tx.folder.delete({
 				where: { id: folderId },
 			});
 
-			const orphans = await prisma.file.findMany({
+			const orphans = await tx.file.findMany({
 				where: { parentFolderId: null },
 			});
 
 			if (orphans.length > 0) {
-				await prisma.file.deleteMany({
+				await tx.file.deleteMany({
 					where: { parentFolderId: null },
 				});
-				const fileURLs = orphans.map((url) => url.fileUrl);
-				//remove files from supabase
-				await supabaseDelete(res, fileURLs);
 			}
+			return orphans;
 		});
+
+		if (orphans.length > 0) {
+			const fileURLs = orphans.map((url) => url.fileUrl);
+			//remove files from supabase
+			await supabaseDelete(fileURLs);
+		}
 
 		res.redirect(req.get("referer"));
 	} catch (err) {
