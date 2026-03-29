@@ -38,10 +38,10 @@ const validateCreateSharedFolder = [
 	body("duration").exists().escape().isInt({ min: 0, max: 14 }).toInt(),
 ];
 
-const validateShareId = [query("shareId").exists().isString()];
+const validateShareId = [query("shareId").exists().isUUID()];
 
 const validateGetSharedFolder = [
-	param("folderUUID").exists().escape().isString(),
+	param("folderUUID").exists().escape().isUUID(),
 ];
 
 export {

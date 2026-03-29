@@ -21,9 +21,15 @@ const validateEditFile = [
 	lengthValidator("newFileName", { min: 1, max: 255 }),
 ];
 
+const validateGetSharedFile = [
+	param("parentShareUUID").exists().escape().isUUID(),
+	query("fileId").exists().escape().isInt().toInt(),
+];
+
 export {
 	validateFileUpload,
 	validateDownloadFile,
 	validateDeleteFile,
 	validateEditFile,
+	validateGetSharedFile,
 };
