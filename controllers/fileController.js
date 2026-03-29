@@ -168,6 +168,11 @@ async function editFile(req, res, next) {
 
 async function downloadSharedFile(req, res, next) {
 	try {
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			next();
+			return;
+		}
 		const { fileId, parentShareId } = matchedData(req);
 
 		const data = await prisma.file.findUnique({
@@ -205,10 +210,48 @@ async function downloadSharedFile(req, res, next) {
 	}
 }
 
+async function getSharedFileDownloadUrl(req, res, next) {
+	try {
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			console.log(errors);
+			next();
+			return;
+		}
+
+		const { fileId } = matchedData(req);
+		const data = await prisma.file.findUnique({
+			where: { id: fileId },
+			include: {
+				parentFolder: {
+					select: { ownerId: true },
+				},
+			},
+		});
+
+		if (req.user.id !== data.parentFolder.ownerId) {
+			next();
+			return;
+		}
+
+		const fileNameWithExt = `${data.name}${data.extension}`;
+
+		const signedUrl = await getSupabaseDownloadUrl(
+			res,
+			data.fileUrl,
+			fileNameWithExt,
+		);
+		res.render("shareLink", { shareLink: signedUrl });
+	} catch (err) {
+		next(err);
+	}
+}
+
 export default {
 	fileUpload,
 	downloadFile,
 	deleteFile,
 	editFile,
 	downloadSharedFile,
+	getSharedFileDownloadUrl,
 };

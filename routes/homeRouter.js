@@ -17,6 +17,7 @@ import {
 	validateDownloadFile,
 	validateEditFile,
 	validateFileUpload,
+	validateShareFile,
 } from "../validation/fileValidation.js";
 
 const homeRouter = new Router();
@@ -43,6 +44,12 @@ homeRouter.post(
 );
 
 homeRouter.post("/editFile", validateEditFile, fileController.editFile);
+
+homeRouter.post(
+	"/shareFile",
+	validateShareFile,
+	fileController.getSharedFileDownloadUrl,
+);
 
 //folders
 

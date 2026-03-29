@@ -26,10 +26,16 @@ const validateGetSharedFile = [
 	query("fileId").exists().escape().isUUID(),
 ];
 
+const validateShareFile = [
+	...validateQueryFileId,
+	body("duration").exists().escape().isInt().toInt(),
+];
+
 export {
 	validateFileUpload,
 	validateDownloadFile,
 	validateDeleteFile,
 	validateEditFile,
 	validateGetSharedFile,
+	validateShareFile,
 };

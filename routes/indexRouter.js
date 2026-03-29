@@ -30,7 +30,7 @@ indexRouter.get(
 );
 
 indexRouter.get(
-	"/download/:parentFolderUUID",
+	"/download/:parentShareUUID",
 	validateGetSharedFile,
 	fileController.downloadSharedFile,
 );

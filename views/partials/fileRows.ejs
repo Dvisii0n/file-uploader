@@ -17,5 +17,21 @@
 		<form action="/home/deleteFile?fileId=<%= file.id %>" method="post">
 			<button type="submit">Delete</button>
         </form>
+		<button commandFor="share-file-<%= file.id %>" command="show-modal">Share</button>
+		<dialog id="share-file-<%= file.id %>">
+			<form action="/home/shareFile?fileId=<%= file.id %>" method="post">
+				<label for="duration">Duration</label>
+				<select name="duration" required>
+					<option value="1">1 day</option>
+					<option value="3">3 days</option>
+					<option value="7">7 days</option>
+					<option value="14">14 days</option>
+				</select>
+
+				<button type="submit">Get share url</button>
+				<button type="button" commandFor="share-file-<%= file.id %>" command="close">Cancel</button>
+				
+			</form>
+		</dialog>
 	</div>		
 <%}) %>
