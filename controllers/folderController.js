@@ -127,7 +127,7 @@ async function deleteFolder(req, res, next) {
 			});
 
 			const orphans = await tx.file.findMany({
-				where: { parentFolderId: null },
+				where: { parentFolderId: null, AND: { ownerId: req.user.id } },
 			});
 
 			if (orphans.length > 0) {
@@ -247,33 +247,48 @@ async function getSharedFolder(req, res, next) {
 			return;
 		}
 		const { folderUUID } = matchedData(req);
-		const folderData = await prisma.sharedFolder.findUnique({
-			where: { id: folderUUID },
-			include: {
-				sharedFolder: {
-					include: {
-						folders: {
-							include: {
-								sharedFolders: {
-									select: { id: true },
-									where: { parentShareId: folderUUID },
+
+		const shareData = await prisma.$transaction(async (tx) => {
+			const shareData = await tx.sharedFolder.findUnique({
+				where: { id: folderUUID },
+				include: {
+					sharedFolder: {
+						include: {
+							folders: {
+								include: {
+									sharedFolders: {
+										select: { id: true },
+										where: { parentShareId: folderUUID },
+									},
 								},
 							},
+							files: true,
 						},
-						files: true,
 					},
 				},
-			},
+			});
+
+			if (!shareData) {
+				return;
+			}
+
+			const currentDate = new Date();
+			if (currentDate >= shareData.expiresAt) {
+				await tx.sharedFolder.delete({ where: { id: shareData.id } });
+				return;
+			}
+
+			return shareData;
 		});
 
-		if (!folderData) {
+		if (!shareData) {
 			next();
 			return;
 		}
 
 		res.render("readOnlyOpenFolder", {
-			folderData: folderData.sharedFolder,
-			shareId: folderData.id,
+			folderData: shareData.sharedFolder,
+			shareId: shareData.id,
 		});
 	} catch (err) {
 		next(err);

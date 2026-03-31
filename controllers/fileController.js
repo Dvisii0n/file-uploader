@@ -2,6 +2,7 @@ import { matchedData, validationResult } from "express-validator";
 import { prisma } from "../lib/prisma.js";
 import {
 	getSupabaseDownloadUrl,
+	getTempSupabaseDownloadUrl,
 	supabaseDelete,
 	supabaseUpload,
 } from "../lib/supabase.js";
@@ -41,7 +42,7 @@ async function fileUpload(req, res, next) {
 			);
 			file["extension"] = path.extname(file.originalname);
 			file["fileUrl"] = filePath;
-			await supabaseUpload(res, filePath, file.buffer);
+			await supabaseUpload(filePath, file.buffer);
 		}
 
 		const filesData = files.map((file) => ({
@@ -52,6 +53,7 @@ async function fileUpload(req, res, next) {
 			extension: file.extension,
 			size_bytes: file.size,
 			parentFolderId: parentId,
+			ownerId: ownerId,
 		}));
 
 		// //register on db
@@ -91,7 +93,6 @@ async function downloadFile(req, res, next) {
 		const fileNameWithExt = `${data.name}${data.extension}`;
 
 		const signedUrl = await getSupabaseDownloadUrl(
-			res,
 			data.fileUrl,
 			fileNameWithExt,
 		);
@@ -141,17 +142,15 @@ async function editFile(req, res, next) {
 		}
 
 		const { fileId, newFileName } = matchedData(req);
-		const data = await prisma.file.findUnique({
+		const file = await prisma.file.findUnique({
 			where: { id: fileId },
 			select: {
 				fileUrl: true,
-				parentFolder: {
-					select: { ownerId: true },
-				},
+				ownerId: true,
 			},
 		});
 
-		if (req.user.id !== data.parentFolder.ownerId) {
+		if (req.user.id !== file.ownerId) {
 			next();
 			return;
 		}
@@ -201,7 +200,6 @@ async function downloadSharedFile(req, res, next) {
 		const fileNameWithExt = `${data.name}${data.extension}`;
 
 		const signedUrl = await getSupabaseDownloadUrl(
-			res,
 			data.fileUrl,
 			fileNameWithExt,
 		);
@@ -215,12 +213,11 @@ async function getSharedFileDownloadUrl(req, res, next) {
 	try {
 		const errors = validationResult(req);
 		if (!errors.isEmpty()) {
-			console.log(errors);
 			next();
 			return;
 		}
 
-		const { fileId } = matchedData(req);
+		const { fileId, duration } = matchedData(req);
 		const data = await prisma.file.findUnique({
 			where: { id: fileId },
 			include: {
@@ -237,8 +234,8 @@ async function getSharedFileDownloadUrl(req, res, next) {
 
 		const fileNameWithExt = `${data.name}${data.extension}`;
 
-		const signedUrl = await getSupabaseDownloadUrl(
-			res,
+		const signedUrl = await getTempSupabaseDownloadUrl(
+			duration,
 			data.fileUrl,
 			fileNameWithExt,
 		);
