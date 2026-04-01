@@ -4,7 +4,6 @@ import { lengthValidator } from "../utils/validationUtils.js";
 
 const pwLength = { min: 8, max: 255 };
 const usernameLength = { min: 3, max: 255 };
-const emailLength = { min: 8, max: 255 };
 
 const validateSignUp = [
 	body("email")
@@ -18,8 +17,6 @@ const validateSignUp = [
 				throw new Error("Email is already taken");
 			}
 		}),
-
-	lengthValidator("email", emailLength),
 
 	body("username")
 		.trim()
@@ -36,7 +33,6 @@ const validateSignUp = [
 	lengthValidator("username", usernameLength),
 
 	body("password")
-		.trim()
 		.isStrongPassword({
 			minLength: 8,
 			minLowercase: 1,
@@ -47,6 +43,14 @@ const validateSignUp = [
 		.withMessage(
 			"Password must be at least 8 characters long and contain at least one lowercase letter, one uppercase letter, one number, and one symbol",
 		),
+
+	body("confirmPassword").custom((value, { req }) => {
+		if (value !== req.body.password) {
+			throw new Error("Passwords do not match");
+		} else {
+			return true;
+		}
+	}),
 ];
 
 const validateLogin = [
