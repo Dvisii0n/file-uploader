@@ -1,18 +1,31 @@
-<script>
-	async function appendToClipboard(text) {
-		const type = "text/plain";
-		const clipboardItemData = {
-			[type]: text,
-		};
-		const clipboardItem = new ClipboardItem(clipboardItemData);
-		await navigator.clipboard.write([clipboardItem]);
-	}
-</script>
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" href="/style.css" />
+		<link rel="icon" type="image/x-icon" href="/icons/favicon.ico" />
+		<title>Share Link</title>
+	</head>
 
-<p class="shareLink"><%= shareLink %></p>
-<button
-	data-link="<%= shareLink %>"
-	onclick="appendToClipboard(this.dataset.link)"
->
-	Copy
-</button>
+	<body>
+		<script>
+			async function appendToClipboard(text) {
+				const type = "text/plain";
+				const clipboardItemData = {
+					[type]: text,
+				};
+				const clipboardItem = new ClipboardItem(clipboardItemData);
+				await navigator.clipboard.write([clipboardItem]);
+			}
+		</script>
+
+		<p class="shareLink"><%= shareLink %></p>
+		<button
+			data-link="<%= shareLink %>"
+			onclick="appendToClipboard(this.dataset.link)"
+		>
+			Copy
+		</button>
+	</body>
+</html>
