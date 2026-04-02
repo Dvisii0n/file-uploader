@@ -1,37 +1,67 @@
 <% files.forEach(file => {%>
-	<div class="fileRow">
-		<p><%= file.name %></p>
-		<p>Type: <%= file.extension %></p>
-		<p><%= file.createdAt %></p>
-		<p><%= file.size_bytes / 1000000%> MB</p>
-		<a href="/home/downloadFile?fileId=<%= file.id%>">Download File</a>
-		<button type="button" commandFor="edit-file-<%= file.id %>" command="show-modal">Edit file</button>
-		<dialog id="edit-file-<%= file.id %>">
-			<form action="/home/editfile?fileId=<%= file.id %>" method="post">
-				<label for="newFileName">Edit file name:</label>
-				<input type="text" name="newFileName" value="<%= file.name %>" required>
-				<button type="submit" >Edit</button>
-				<button type="button" commandFor="edit-file-<%= file.id %>" command="close">Cancel</button>
-			</form>
-		</dialog>
-		<form action="/home/deleteFile?fileId=<%= file.id %>" method="post">
-			<button type="submit">Delete</button>
-        </form>
-		<button commandFor="share-file-<%= file.id %>" command="show-modal">Share</button>
-		<dialog id="share-file-<%= file.id %>">
-			<form action="/home/shareFile?fileId=<%= file.id %>" method="post">
-				<label for="duration">Duration</label>
-				<select name="duration" required>
-					<option value="1">1 day</option>
-					<option value="3">3 days</option>
-					<option value="7">7 days</option>
-					<option value="14">14 days</option>
-				</select>
+<div class="fileRow">
+	<img src="/icons/file.svg" alt="file icon">
+	<p class="fileName"><%= file.name %><%= file.extension %></p>
 
-				<button type="submit">Get share url</button>
-				<button type="button" commandFor="share-file-<%= file.id %>" command="close">Cancel</button>
-				
-			</form>
-		</dialog>
-	</div>		
+	<button onClick="window.location.href = '/home/downloadFile?fileId=<%= file.id%>'" class="download">
+		<img src="/icons/download.svg" alt="download button" class="rowIcon">
+	</button>
+	<p class="fileSize"><%= file.size_bytes %></p>
+	<button class="edit" type="button" commandFor="edit-file-<%= file.id %>" command="show-modal">
+		<img src="/icons/edit.svg" alt="edit button" class="rowIcon">
+	</button>
+	<dialog id="edit-file-<%= file.id %>">
+		<form action="/home/editfile?fileId=<%= file.id %>" method="post">
+			<button type="button" commandFor="edit-file-<%= file.id %>" command="close" class="closeBtn">
+				<img src="/icons/close.svg" alt="close button">
+
+			</button>
+			<label for="newFileName">Edit file name:</label>
+			<input type="text" name="newFileName" value="<%= file.name %>" required>
+			<div class="dialogBottom">
+				<button type="button" commandFor="edit-file-<%= file.id %>" command="close" class="cancelBtn">Cancel</button>
+				<button type="submit" class="submitBtn">Edit</button>
+			</div>
+		</form>
+	</dialog>
+
+	<button class="delete" commandFor="delete-file-<%= file.id %>" command="show-modal">
+		<img src="/icons/delete.svg" alt="delete button" class="rowIcon">
+	</button>
+	<dialog id="delete-file-<%= file.id %>">
+		<form action="/home/deleteFile?fileId=<%= file.id %>" method="post">
+			<button type="button" commandFor="delete-file-<%= file.id %>" command="close" class="closeBtn">
+				<img src="/icons/close.svg" alt="close button">
+			</button>
+			<p class="deleteMessage">Are you sure you want to permanently delete this file?<span class="asterisk">**</span></p>
+			<div class="dialogBottom">
+				<button type="button" commandFor="delete-file-<%= file.id %>" command="close" class="cancelBtn">No</button>
+				<button type="submit" class="submitBtn">Yes</button>
+			</div>
+		</form>
+	</dialog>
+
+	<button class="share" commandFor="share-file-<%= file.id %>" command="show-modal">
+		<img src="/icons/share.svg" alt="share button" class="rowIcon">
+	</button>
+	<dialog id="share-file-<%= file.id %>">
+		<form action="/home/shareFile?fileId=<%= file.id %>" method="post">
+			<button type="button" commandFor="share-file-<%= file.id %>" command="close" class="closeBtn">
+				<img src="/icons/close.svg" alt="close button">
+			</button>
+			<label for="duration">File share duration</label>
+			<select name="duration" class="duration" required>
+				<option value="1">1 day</option>
+				<option value="3">3 days</option>
+				<option value="7">7 days</option>
+				<option value="14">14 days</option>
+			</select>
+			<div class="dialogBottom">
+				<button type="button" commandFor="share-file-<%= file.id %>" command="close" class="cancelBtn" >Cancel</button>
+				<button type="submit" class="submitBtn">Get url</button>
+			</div>
+		</form>
+	</dialog>
+	<p class="createdAt"><%= file.createdAt %></p>
+</div>
 <%}) %>

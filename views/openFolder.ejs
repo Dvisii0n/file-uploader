@@ -1,41 +1,54 @@
 <div class="openFolder" folderName="<%= folderData.name %>" folderId="<%= folderData.id %>">
-	<div class="pathNavigation"></div>
 
-	<div class="folderButtons">
-		<% if (folderData.name !== 'home') {%>
-			<button class="goBack">Go back</button>
-		<%} %>
-		
-		<button commandfor="upload-file" command="show-modal">Upload file</button>
-		<button commandfor="create-folder" command="show-modal">
-			Create folder
-		</button>
-		<dialog id="upload-file">
-			<form action="/home/upload/<%= folderData.id %>" method="post" enctype="multipart/form-data">
-				<button type="button" commandfor="upload-file" command="close">
-					Close
-				</button>
-				<label for="uploadedFiles">Files</label>
-				<input id="file-upload" type="file" name="uploadedFiles" multiple required />
-				<button type="submit">Upload</button>
-			</form>
-		</dialog>
+	<div class="folderTop">
+		<div class="folderButtons">
 
-		<dialog id="create-folder">
-			<form action="/home/createFolder/<%= folderData.id %>" method="post">
-				<button type="button" commandfor="create-folder" command="close">
-					Close
-				</button>
-				<label for="folderName">Folder name: </label>
-				<input type="text" name="folderName" required />
-				<button type="submit">Create</button>
-			</form>
-		</dialog>
+			<button commandfor="upload-file" command="show-modal" class="upload"><img class="uploadIcon" src="/icons/upload.svg" alt="upload file icon">Upload</button>
+			<button commandfor="create-folder" command="show-modal" class="createFolder"><img class="createFolderIcon" src="/icons/createFolder.svg" alt="create folder icon">
+				Create folder
+			</button>
+			<dialog id="upload-file">
+				<form action="/home/upload/<%= folderData.id %>" method="post" enctype="multipart/form-data">
+					<button type="button" commandFor="upload-file" command="close" class="closeBtn">
+						<img src="/icons/close.svg" alt="close button">
+					</button>
+					<label for="uploadedFiles">Upload up to 5 files (max 6MB each)</label>
+					<input id="file-upload" type="file" name="uploadedFiles" multiple required />
+					<div class="dialogBottom">
+						<button type="button" commandFor="upload-file" command="close" class="cancelBtn">
+							Cancel
+						</button>
+						<button type="submit" class="submitBtn">Upload</button>
+					</div>
+				</form>
+			</dialog>
+
+			<dialog id="create-folder">
+				<form action="/home/createFolder/<%= folderData.id %>" method="post">
+					<button type="button" commandFor="create-folder" command="close" class="closeBtn">
+						<img src="/icons/close.svg" alt="close button">
+					</button>
+
+					<label for="folderName">Folder name: </label>
+					<input type="text" name="folderName" required />
+					<div class="dialogBottom">
+						<button type="button" commandfor="create-folder" command="close" class="cancelBtn">
+							Cancel
+						</button>
+						<button type="submit" class="submitBtn">Create</button>
+
+					</div>
+
+				</form>
+			</dialog>
+		</div>
+
+		<div class="pathNavigation"></div>
 	</div>
 
 
 	<% if (!folderData.folders.length && !folderData.files.length) {%>
-	<p>This folder is empty</p>
+	<p class="emptyMessage">This folder is empty</p>
 	<%} %>
 
 	<% if (folderData.folders.length) {%>

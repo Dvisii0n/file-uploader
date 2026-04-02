@@ -1,36 +1,68 @@
 <% folders.forEach(folder => {%>
-	<div class="folderRow">
-		<a href="/home/folder/<%= folder.id %>"><%= folder.name %></a>
-		<p><%= folder.createdAt %></p>
-		<button type="button" commandFor="edit-folder-<%= folder.id %>" command="show-modal">Edit folder</button>
-		<dialog id="edit-folder-<%= folder.id %>">
-			<form action="/home/editFolder/<%= folder.id %>" method="post">
-				<label for="newFolderName">Folder name:</label>
-				<input type="text" name="newFolderName" value="<%= folder.name %>" required>
-				<button type="submit" >Edit</button>
-				<button type="button" commandFor="edit-folder-<%= folder.id %>" command="close">Cancel</button>
-			</form>
-		</dialog>
-		<form action="/home/deleteFolder/<%= folder.id %>" method="post">
-			<button type="submit">Delete</button>
-		</form>
-		<button commandFor="share-folder-<%= folder.id %>" command='show-modal' type="submit">Share</button>
-		<dialog id="share-folder-<%= folder.id %>">
-			<form action="/home/createSharedFolder/<%= folder.id %>" method="post">
-				<label for="duration">Duration</label>
-				<select name="duration" required>
-					<option value="1">1 day</option>
-					<option value="3">3 days</option>
-					<option value="7">7 days</option>
-					<option value="14">14 days</option>
-				</select>
+<div class="folderRow">
+	<img src="/icons/folder.svg" alt="folder icon">
+	<a href="/home/folder/<%= folder.id %>" class="folderName"><%= folder.name %></a>
 
-				<button type="submit">Get share url</button>
-				<button type="button" commandFor="share-folder-<%= folder.id %>" command="close">Cancel</button>
-				
-			</form>
-		</dialog>
-		
-		
-	</div>
+	<button class="edit" type="button" commandFor="edit-folder-<%= folder.id %>" command="show-modal">
+		<img src="/icons/edit.svg" alt="edit button" class="rowIcon">
+	</button>
+	<dialog id="edit-folder-<%= folder.id %>">
+		<form action="/home/editFolder/<%= folder.id %>" method="post">
+			<button type="button" commandFor="edit-folder-<%= folder.id %>" command="close" class="closeBtn">
+				<img src="/icons/close.svg" alt="close button">
+
+			</button>
+			<label for="newFolderName">Edit folder name:</label>
+			<input type="text" name="newFolderName" value="<%= folder.name %>" required>
+			<div class="dialogBottom">
+				<button type="button" commandFor="edit-folder-<%= folder.id %>" command="close" class="cancelBtn">
+					Cancel
+				</button>
+
+				<button type="submit" class="submitBtn">Edit</button>
+			</div>
+		</form>
+	</dialog>
+	<button class="delete" commandFor="delete-folder-<%= folder.id %>" command="show-modal">
+		<img src="/icons/delete.svg" alt="delete button" class="rowIcon">
+	</button>
+	<dialog id="delete-folder-<%= folder.id %>">
+		<form action="/home/deleteFolder/<%= folder.id %>" method="post">
+			<button type="button" commandFor="delete-folder-<%= folder.id %>" command="close" class="closeBtn">
+				<img src="/icons/close.svg" alt="close button">
+			</button>
+			<p class="deleteMessage">Are you sure you want to permanently delete this folder and all of its contents?<span class="asterisk">**</span></p>
+			<div class="dialogBottom">
+				<button type="button" commandFor="delete-folder-<%= folder.id %>" command="close" class="cancelBtn">No</button>
+				<button type="submit" class="submitBtn">Yes</button>
+			</div>
+		</form>
+	</dialog>
+
+	<button class="share" commandFor="share-folder-<%= folder.id %>" command='show-modal' type="submit">
+		<img src="/icons/share.svg" alt="share button" class="rowIcon">
+	</button>
+	<dialog id="share-folder-<%= folder.id %>">
+		<form action="/home/createSharedFolder/<%= folder.id %>" method="post">
+			<button type="button" commandFor="share-folder-<%= folder.id %>" command="close" class="closeBtn">
+				<img src="/icons/close.svg" alt="close button">
+			</button>
+			<label for="duration">Folder share duration</label>
+			<select name="duration"  class="duration" required>
+				<option value="1">1 day</option>
+				<option value="3">3 days</option>
+				<option value="7">7 days</option>
+				<option value="14">14 days</option>
+			</select>
+
+			<div class="dialogBottom">
+				<button type="button" commandFor="share-folder-<%= folder.id %>" command="close" class="cancelBtn">Cancel</button>
+				<button type="submit" class="submitBtn">Get url</button>
+			</div>
+		</form>
+	</dialog>
+	<p class="createdAt"><%= folder.createdAt %></p>
+
+
+</div>
 <%}) %>

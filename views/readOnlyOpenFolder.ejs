@@ -10,23 +10,28 @@
 </head>
 
 <body>
-	<div class="openFolder" folderName="<%= folderData.name %>" folderId="<%= folderData.id %>">
-		<h1><%= folderData.name %></h1>
-       
-		<% if (!folderData.folders.length && !folderData.files.length) {%>
-		<p>This folder is empty</p>
-		<%} %>
+	<%- include('partials/header') %>
+	<h1 class="sharedTitle">Shared folder: <%= folderData.name %></h1>
+	<main class="home ">
 
-		<% if (folderData.folders.length) {%>
-		<%- include('partials/readOnlyFolderRows', {folders: folderData.folders}) %>
+		<div class="openFolder readOnly" folderName="<%= folderData.name %>" folderId="<%= folderData.id %>">
+			<% if (!folderData.folders.length && !folderData.files.length) {%>
+			<p class="emptyMessage">This folder is empty</p>
+			<%} %>
 
-		<% } %>
+			<% if (folderData.folders.length) {%>
+			<%- include('partials/readOnlyFolderRows', {folders: folderData.folders}) %>
 
-		<% if (folderData.files.length) {%>
-		<%- include('partials/readOnlyFileRows', {files: folderData.files, parentShareId: shareId}) %>
+			<% } %>
 
-		<% } %>
-	</div>
+			<% if (folderData.files.length) {%>
+			<%- include('partials/readOnlyFileRows', {files: folderData.files, parentShareId: shareId}) %>
+
+			<% } %>
+		</div>
+	</main>
+	<%- include('partials/footer') %>
 </body>
+<script src="/scripts/modifyDisplayValues.js" defer></script>
 
 </html>

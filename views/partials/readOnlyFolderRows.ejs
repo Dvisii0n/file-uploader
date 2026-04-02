@@ -1,8 +1,9 @@
 <% folders.forEach(folder => {%>
 	<% if (folder.sharedFolders.length > 0) {%>
 		<div class="folderRow">
-			<a href="/share/<%= folder.sharedFolders[0].id %>"><%= folder.name %></a>
-			<p><%= folder.createdAt %></p>
+			<img src="/icons/folder.svg" alt="folder icon">
+			<a class="folderName" href="/share/<%= folder.sharedFolders[0].id %>"><%= folder.name %></a>
+			<p class="createdAt readOnly"><%= folder.createdAt %></p>
 		</div>	
 	<%}%>
 <%}) %>
